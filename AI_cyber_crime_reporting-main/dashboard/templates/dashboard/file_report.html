@@ -1,0 +1,274 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>File a New Report</title>
+    <link rel="stylesheet" href="{% static 'dashboard/css/user_dashboard.css' %}?v=12">
+    <style>
+        /* Form Styles */
+        .form-container {
+            background-color: #1F2937;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid #374151;
+            max-width: 800px;
+            margin: 2rem auto;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #9CA3AF;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #374151;
+            border: 1px solid #4B5563;
+            border-radius: 6px;
+            color: #E5E7EB;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* AI Buttons */
+        .ai-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-ai-suggest,
+        .btn-auto-enhance {
+            background: rgba(139, 92, 246, 0.1);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-ai-suggest:hover,
+        .btn-auto-enhance:hover {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Layout */
+        .form-row {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .half-width {
+            flex: 1;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <h1>File a New Cybercrime Report</h1>
+        <a href="{% url 'user_dashboard' %}" class="btn-back">Back to Dashboard</a>
+    </header>
+    <main class="dashboard full-width">
+        <div class="form-container">
+            <h2>File a New Report</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="id_description">Description of Incident:</label>
+                    {{ form.description }}
+                    <div class="ai-buttons">
+                        <button type="button" id="suggest-btn" class="btn-ai-suggest">
+                            ✨ AI Suggest Case Type
+                        </button>
+                        <button type="button" id="enhance-btn" class="btn-auto-enhance">
+                            📝 Auto-Enhance Description
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group half-width">
+                        <label for="id_case_type">Case Type:</label>
+                        {{ form.case_type }}
+                    </div>
+
+                    <div class="form-group half-width">
+                        <label for="id_department">Department:</label>
+                        {{ form.department }}
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Report</button>
+            </form>
+        </div>
+
+        <script>
+            document.getElementById('suggest-btn').addEventListener('click', function () {
+                const description = document.getElementById('id_description').value;
+                const btn = this;
+
+                if (!description) {
+                    alert('Please enter a description first.');
+                    return;
+                }
+
+                btn.textContent = 'Analyzing...';
+                btn.disabled = true;
+
+                fetch("{% url 'predict_case_type' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ description: description })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        let msg = "";
+
+                        // Handle Case Type
+                        if (data.suggested_type) {
+                            const select = document.getElementById('id_case_type');
+                            let found = false;
+                            for (let i = 0; i < select.options.length; i++) {
+                                if (select.options[i].value === data.suggested_type) {
+                                    select.selectedIndex = i;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (found) {
+                                msg += 'Case Type: ' + data.suggested_type + ' (Auto-selected)\n';
+                            } else {
+                                msg += 'Case Type: ' + data.suggested_type + ' (Could not auto-select)\n';
+                            }
+                        }
+
+                        // Handle Department
+                        if (data.suggested_department) {
+                            const selectDept = document.getElementById('id_department');
+                            let foundDept = false;
+                            for (let i = 0; i < selectDept.options.length; i++) {
+                                if (selectDept.options[i].value === data.suggested_department) {
+                                    selectDept.selectedIndex = i;
+                                    foundDept = true;
+                                    break;
+                                }
+                            }
+                            if (foundDept) {
+                                msg += 'Department: ' + data.suggested_department + ' (Auto-selected)';
+                            } else {
+                                msg += 'Department: ' + data.suggested_department + ' (Could not auto-select)';
+                            }
+                        }
+
+                        if (msg) {
+                            alert('AI Suggestion:\n' + msg);
+                        } else if (data.error) {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred.');
+                    })
+                    .finally(() => {
+                        btn.textContent = '✨ AI Suggest Case Type';
+                        btn.disabled = false;
+                    });
+            });
+
+            document.getElementById('enhance-btn').addEventListener('click', function () {
+                const descriptionField = document.getElementById('id_description');
+                const roughDraft = descriptionField.value;
+                const btn = this;
+
+                if (!roughDraft) {
+                    alert('Please enter some text to enhance.');
+                    return;
+                }
+
+                btn.textContent = 'Enhancing...';
+                btn.disabled = true;
+
+                fetch("{% url 'generate_description' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ rough_draft: roughDraft })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.refined_description) {
+                            descriptionField.value = data.refined_description;
+                        } else if (data.error) {
+                            alert('Error: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred.');
+                    })
+                    .finally(() => {
+                        btn.textContent = '📝 Auto-Enhance Description';
+                        btn.disabled = false;
+                    });
+            });
+        </script>
+    </main>
+</body>
+
+</html>

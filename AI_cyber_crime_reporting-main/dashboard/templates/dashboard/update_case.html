@@ -1,0 +1,57 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Update Case Status</title>
+    <link rel="stylesheet" href="{% static 'dashboard/css/investigator_dashboard.css' %}?v=7">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>Update Status for Case #{{ case.id }}</h1>
+            <div class="header-actions">
+                <a href="{% url 'investigator_dashboard' %}" class="btn-nav">Back to Dashboard</a>
+            </div>
+        </div>
+    </header>
+    <main class="dashboard-container" style="grid-template-columns: 1fr;">
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+            <div style="margin-bottom: 1.5rem;">
+                <p style="margin-bottom: 0.5rem;"><strong>User:</strong> {{ case.user.username }}</p>
+                <p style="margin-bottom: 0.5rem;"><strong>Case Type:</strong> {{ case.case_type }}</p>
+                <div style="margin-bottom: 0.5rem;">
+                    <strong>Description:</strong>
+                    <div
+                        style="background: rgba(15, 23, 42, 0.3); padding: 1rem; border-radius: 8px; margin-top: 0.5rem; white-space: pre-wrap; max-height: 200px; overflow-y: auto; border: 1px solid rgba(148, 163, 184, 0.1);">
+                        {{ case.description }}</div>
+                </div>
+                <p style="margin-bottom: 0.5rem;"><strong>Current Status:</strong> <span
+                        class="status status-{{ case.status|lower|cut:' ' }}">{{ case.status }}</span></p>
+            </div>
+
+            <form method="post" style="margin-top: 20px; display: flex; gap: 1rem; align-items: center;">
+                {% csrf_token %}
+                <div style="flex-grow: 1;">
+                    <label for="status"
+                        style="display: block; margin-bottom: 0.5rem; color: #94a3b8; font-size: 0.9rem;">New
+                        Status</label>
+                    <select name="status" id="status" class="form-select">
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if case.status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div style="align-self: flex-end;">
+                    <button type="submit" class="btn-update">Update Status</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+
+</html>

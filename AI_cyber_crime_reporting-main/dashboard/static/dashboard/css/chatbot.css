@@ -1,0 +1,124 @@
+/* --- CSS FOR A LARGE, CENTERED CHAT MODAL --- */
+
+/* The floating button to open the chat */
+.chatbot-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #3B82F6;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 999;
+}
+
+/* The dark overlay that covers the page */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+    z-index: 1000;
+    display: none; /* Hidden by default */
+}
+
+/* The main chat modal window - LARGER SIZE */
+.chat-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* This centers the modal */
+    width: 80%; /* Takes up 80% of the screen width */
+    max-width: 800px; /* But not more than 800px wide */
+    height: 85vh; /* Takes up 85% of the screen height */
+    background-color: #1F2937;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    display: none;
+    flex-direction: column;
+    z-index: 1001; /* Appears on top of the overlay */
+}
+
+/* This class will be toggled by JavaScript to show/hide the modal */
+.modal-overlay.active,
+.chat-modal.active {
+    display: flex;
+}
+
+/* Styling for the header, body, and footer of the chat */
+.chat-header { 
+    background-color: #374151;
+    color: #E5E7EB; 
+    padding: 15px; 
+    border-top-left-radius: 10px; 
+    border-top-right-radius: 10px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    font-weight: bold; 
+    font-size: 1.2rem; 
+}
+.chat-close-btn { 
+    background: none; 
+    border: none; 
+    color: #9CA3AF; 
+    font-size: 2rem; 
+    cursor: pointer; 
+}
+.chat-body { 
+    flex-grow: 1; 
+    padding: 20px; 
+    overflow-y: auto; 
+    background-color: #111827; 
+    display: flex;
+    flex-direction: column;
+}
+.message { 
+    padding: 10px 15px; 
+    border-radius: 18px; 
+    margin-bottom: 12px; 
+    max-width: 80%; 
+    word-wrap: break-word; 
+    font-size: 0.95rem; 
+}
+.message.received { 
+    background-color: #374151; 
+    color: #E5E7EB; 
+    align-self: flex-start; 
+}
+.message.sent { 
+    background-color: #3B82F6; 
+    color: #FFFFFF; 
+    align-self: flex-end; 
+}
+.chat-footer { 
+    display: flex; 
+    padding: 15px; 
+    border-top: 1px solid #374151; 
+}
+#chat-input { 
+    flex-grow: 1; 
+    border: 1px solid #374151; 
+    background-color: #111827; 
+    color: #E5E7EB; 
+    border-radius: 20px; 
+    padding: 12px 18px; 
+    font-size: 1rem; 
+}
+#chat-send-btn { 
+    margin-left: 10px; 
+    border: none; 
+    background-color: #3B82F6; 
+    color: white; 
+    border-radius: 20px; 
+    padding: 12px 20px; 
+    cursor: pointer; 
+    font-weight: bold; 
+}

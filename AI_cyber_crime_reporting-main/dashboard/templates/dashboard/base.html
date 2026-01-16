@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Cybercrime Reporting Platform{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121828;
+            color: #E5E7EB;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #1F2937;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            border: 1px solid #374151;
+            margin: auto;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1,
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        a {
+            color: #3B82F6;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #2563EB;
+            text-decoration: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #2563EB;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #374151;
+            background-color: #374151;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        /* Form Styling */
+        form p {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #D1D5DB;
+            /* Gray-300 */
+            font-weight: 500;
+        }
+
+        .helptext {
+            display: block;
+            font-size: 0.85rem;
+            color: #9CA3AF;
+            /* Gray-400 */
+            margin-top: 0.25rem;
+            line-height: 1.4;
+        }
+
+        ul.errorlist {
+            list-style: none;
+            padding: 0;
+            margin: 0.5rem 0;
+            color: #EF4444;
+            /* Red-500 */
+            font-size: 0.9rem;
+            text-align: left;
+        }
+
+        ul.errorlist li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Header Styling matching user_dashboard.css */
+        .header {
+            background: rgba(15, 23, 42, 0.8);
+            color: #3b82f6;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #3b82f6;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-nav {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav:hover {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            border-color: rgba(59, 130, 246, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-logout {
+            background: rgba(255, 59, 48, 0.2);
+            color: #ff3b30;
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-top: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 59, 48, 0.4);
+            box-shadow: 0 0 10px rgba(255, 59, 48, 0.3);
+            transform: translateY(-1px);
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header class="header">
+        <h1>CyberShield</h1>
+        <div class="header-actions">
+            <a href="{% url 'home' %}" class="btn-nav">Home</a>
+            {% if user.is_authenticated %}
+            {% if user.is_superuser %}
+            <a href="{% url 'investigator_dashboard' %}" class="btn-nav">Dashboard</a>
+            {% else %}
+            <a href="{% url 'user_dashboard' %}" class="btn-nav">Dashboard</a>
+            {% endif %}
+            <form action="{% url 'logout' %}" method="post" style="display: flex; align-items: center; margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn-logout">Logout</button>
+            </form>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn-nav">Login</a>
+            <a href="{% url 'signup' %}" class="btn-nav">Sign Up</a>
+            {% endif %}
+        </div>
+    </header>
+
+    {% block content %}
+    {% endblock %}
+</body>
+
+</html>

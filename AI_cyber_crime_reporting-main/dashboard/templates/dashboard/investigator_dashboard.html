@@ -1,0 +1,218 @@
+{% load static %}
+<!DOCTYPE html>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Investigator Dashboard</title>
+    <link rel="stylesheet" href="{% static 'dashboard/css/investigator_dashboard.css' %}?v=6">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>CyberShield Investigator Portal</h1>
+            <div class="header-actions">
+                <a href="{% url 'home' %}" class="btn-nav">Home</a>
+                <a href="{% url 'all_complaints' %}" class="btn-nav">All Complaints</a>
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-nav btn-logout">Logout</button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="dashboard-main">
+            <!-- AI Insights Section -->
+            <div class="card ai-insights-card">
+                <h2><span class="icon">🤖</span>AI Intelligence Briefing</h2>
+                <div style="width: 150px; height: 150px; margin: 0 auto;">
+                    <lottie-player src="https://assets8.lottiefiles.com/packages/lf20_5tl1xxnz.json"
+                        background="transparent" speed="1" style="width: 100%; height: 100%;" loop
+                        autoplay></lottie-player>
+                </div>
+                <div class="ai-content">
+                    <p>{{ ai_insights|linebreaks }}</p>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>Incident Type</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Date Reported</th>
+                            <th>Filed By</th>
+                            <th>Manage Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for case in cases %}
+                        <tr>
+                            <td><strong>C-{{ case.id }}</strong></td>
+                            <td>{{ case.case_type }}</td>
+                            <td>{{ case.department }}</td>
+                            <td><span class="status status-open">{{ case.status }}</span></td>
+                            <td>{{ case.date_filed|date:"Y-m-d" }}</td>
+                            <td>{{ case.user.username }}</td>
+                            <td>
+                                <a href="{% url 'case_detail' case.id %}" class="btn-action btn-action-primary">View
+                                    Messages</a>
+                                <a href="{% url 'update_case_status' case.id %}"
+                                    class="btn-action btn-action-secondary">Update Status</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No cases found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2><span class="icon">🌍</span>Live Threat Heatmap</h2>
+                <div class="map-container">
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-sidebar">
+            <div class="card">
+                <h2><span class="icon">💬</span>Victim Notifications</h2>
+                <ul class="alerts-list">
+                    {% for message in recent_messages %}
+                    <li class="alert-item info">
+                        <div class="alert-text">
+                            <span>📝</span>
+                            <div class="alert-header">
+                                <strong>Message from CASE - {{ message.case.id }}</strong>
+                                <form method="post" style="display:inline;">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="mark_read" value="true">
+                                    <input type="hidden" name="message_id" value="{{ message.id }}">
+                                    <button type="submit" class="btn-mark-read" title="Mark as Read">✓</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="alert-time">{{ message.timestamp|date:"M d, Y H:i" }}</div>
+                    </li>
+                    {% empty %}
+                    <li class="alert-item">
+                        <div class="alert-text">No recent messages from victims.</div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2><span class="icon">📊</span>Performance Analytics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item"><span class="stat-value">{{ total_cases }}</span><span
+                            class="stat-label">Total
+                            Cases</span></div>
+                    <div class="stat-item"><span class="stat-value">{{ active_cases }}</span><span
+                            class="stat-label">Active</span></div>
+                    <div class="stat-item"><span class="stat-value">{{ resolved_cases }}</span><span
+                            class="stat-label">Resolved</span></div>
+                    <div class="stat-item"><span class="stat-value">{{ success_rate }}%</span><span
+                            class="stat-label">Success
+                            Rate</span></div>
+                </div>
+                <div class="chart-container"><canvas id="casesByType" height="150"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    {{ chart_labels|json_script:"chart-labels" }}
+    {{ chart_data|json_script:"chart-data" }}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Chart.js initialization
+            const caseTypeLabels = JSON.parse(document.getElementById('chart-labels').textContent);
+            const caseTypeData = JSON.parse(document.getElementById('chart-data').textContent);
+            const casesByTypeCanvas = document.getElementById('casesByType');
+
+            if (casesByTypeCanvas && caseTypeLabels.length > 0) {
+                new Chart(casesByTypeCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: caseTypeLabels,
+                        datasets: [{
+                            label: 'Cases by Type',
+                            data: caseTypeData,
+                            backgroundColor: ['rgba(59, 130, 246, 0.8)', 'rgba(239, 68, 68, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(249, 115, 22, 0.8)', 'rgba(20, 184, 166, 0.8)', 'rgba(245, 158, 11, 0.8)'],
+                            borderColor: ['rgba(59, 130, 246, 1)', 'rgba(239, 68, 68, 1)', 'rgba(139, 92, 246, 1)', 'rgba(249, 115, 22, 1)', 'rgba(20, 184, 166, 1)', 'rgba(245, 158, 11, 1)'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: 'Distribution of Case Types' }
+                        }
+                    }
+                });
+            }
+
+            // Leaflet Map Initialization
+            const map = L.map('map').setView([20.5937, 78.9629], 5); // Center on India
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Fetch Heatmap Data
+            fetch("{% url 'get_heatmap_data' %}")
+                .then(response => response.json())
+                .then(data => {
+                    const heatData = data.data;
+                    if (heatData.length > 0) {
+                        L.heatLayer(heatData, {
+                            radius: 40,
+                            blur: 20,
+                            maxZoom: 10,
+                            minOpacity: 0.1,
+                            gradient: { 0.4: 'rgba(0, 0, 255, 0.2)', 0.65: 'rgba(0, 255, 0, 0.2)', 1: 'rgba(255, 0, 0, 0.2)' }
+                        }).addTo(map);
+
+                        // Failsafe: Force canvas opacity via CSS
+                        const heatCanvas = document.querySelector('.leaflet-heatmap-layer');
+                        if (heatCanvas) {
+                            heatCanvas.style.opacity = '0.6';
+                        }
+                    }
+                })
+                .catch(error => console.error('Error loading heatmap data:', error));
+        });
+    </script>
+    <!-- Lottie Player Script -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+</body>
+
+</html>

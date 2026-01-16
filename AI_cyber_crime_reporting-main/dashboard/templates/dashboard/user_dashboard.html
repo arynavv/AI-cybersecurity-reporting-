@@ -1,0 +1,439 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Case Dashboard</title>
+
+    <link rel="stylesheet" href="{% static 'dashboard/css/user_dashboard.css' %}?v=10">
+    <link rel="stylesheet" href="{% static 'dashboard/css/chatbot.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* Professional Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes typing {
+            0% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateY(-3px);
+            }
+
+            100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+        }
+
+        .dashboard section,
+        .dashboard aside {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .stat-item {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Table Row Hover */
+        table tbody tr {
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        table tbody tr:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            transform: scale(1.01);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Button Hover */
+        .btn-file-report,
+        .btn-logout,
+        .btn-action {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-file-report:hover,
+        .btn-logout:hover,
+        .btn-action:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* AI Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            width: fit-content;
+            margin-bottom: 10px;
+            display: none;
+            /* Hidden by default */
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            animation: typing 1s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* Language Switch Animation */
+        .chat-header select {
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <h1>Your Case Dashboard</h1>
+        <div class="header-actions">
+            <a href="{% url 'file_report' %}" class="btn-file-report">File a New Report</a>
+            <a href="{% url 'edit_profile' %}" class="btn-file-report"
+                style="background: linear-gradient(135deg, #10b981, #059669);">Edit Profile</a>
+            <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-logout">Logout</button>
+            </form>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        {% if missing_address %}
+        <div
+            style="grid-column: 1 / -1; background: linear-gradient(to right, rgba(220, 38, 38, 0.15), rgba(153, 27, 27, 0.15)); border: 1px solid rgba(239, 68, 68, 0.3); border-left: 4px solid #ef4444; color: #fecaca; padding: 1rem 1.5rem; border-radius: 12px; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <span style="font-size: 1.5rem; filter: drop-shadow(0 0 5px rgba(239, 68, 68, 0.5));">⚠️</span>
+                <div>
+                    <strong style="color: #ef4444; font-size: 1.1rem; letter-spacing: 0.5px;">Action Required</strong>
+                    <p style="margin: 0.25rem 0 0; font-size: 0.95rem; color: #cbd5e1;">Your profile is missing address
+                        details. This is required for our investigation heatmap.</p>
+                </div>
+            </div>
+            <a href="{% url 'edit_profile' %}"
+                style="background: #ef4444; color: white; padding: 0.6rem 1.2rem; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);">Update
+                Profile Now</a>
+        </div>
+        {% endif %}
+
+        <section>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value">{{ active_cases.count|add:completed_cases_count }}</span>
+                    <span class="stat-label">Total Reports Filed</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ active_cases.count }}</span>
+                    <span class="stat-label">Active Cases</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ completed_cases_count }}</span>
+                    <span class="stat-label">Completed Cases</span>
+                </div>
+            </div>
+
+            <h3 style="margin-bottom: 1rem; color: #94a3b8; font-size: 1.1rem;">Active Cases</h3>
+            <div class="table-container" style="margin-bottom: 2rem;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for case in active_cases %}
+                        <tr>
+                            <td>#{{ case.id }}</td>
+                            <td>{{ case.date_filed|date:"M d, Y" }}</td>
+                            <td>{{ case.case_type }}</td>
+                            <td>{{ case.department }}</td>
+                            <td>
+                                <span class="status-badge {{ case.status|lower|slugify }}">{{ case.status }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'case_detail' case.id %}" class="btn-action">View</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No active cases.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-bottom: 1rem; color: #94a3b8; font-size: 1.1rem;">Resolved & Closed Cases</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for case in resolved_cases %}
+                        <tr>
+                            <td>#{{ case.id }}</td>
+                            <td>{{ case.date_filed|date:"M d, Y" }}</td>
+                            <td>{{ case.case_type }}</td>
+                            <td>{{ case.department }}</td>
+                            <td>
+                                <span class="status-badge {{ case.status|lower|slugify }}">{{ case.status }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'case_detail' case.id %}" class="btn-action">View</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">No resolved or closed cases.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <aside>
+            <div class="chart-container">
+                <h2>Proactive Safety Alerts</h2>
+                <ul class="alerts-list" id="alerts-list">
+                    <li>{{ safety_tip }}</li>
+                </ul>
+            </div>
+            <div class="chart-container">
+                <h2>Notifications</h2>
+                {% if unread_messages %}
+                <ul class="alerts-list">
+                    {% for msg in unread_messages %}
+                    <li class="alert-item info">
+                        <div class="alert-text">
+                            <strong>New Message</strong> for Case #{{ msg.case.id }}
+                        </div>
+                        <div class="alert-time">
+                            From: {{ msg.case.department|default:"Investigator" }}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>You will be notified here if an investigator sends you a secure message.</p>
+                {% endif %}
+            </div>
+        </aside>
+    </main>
+
+    <div class="modal-overlay" id="modal-overlay"></div>
+    <div class="chat-modal" id="chat-modal">
+        <div class="chat-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                AI Assistant
+                <select id="language-selector"
+                    style="font-size: 0.8rem; padding: 2px 5px; border-radius: 4px; border: none; background: rgba(255,255,255,0.2); color: white;">
+                    <option value="English" style="color: black;">English</option>
+                    <option value="Hindi" style="color: black;">Hindi</option>
+                    <option value="Bengali" style="color: black;">Bengali</option>
+                    <option value="Tamil" style="color: black;">Tamil</option>
+                    <option value="Telugu" style="color: black;">Telugu</option>
+                    <option value="Marathi" style="color: black;">Marathi</option>
+                    <option value="Gujarati" style="color: black;">Gujarati</option>
+                    <option value="Kannada" style="color: black;">Kannada</option>
+                    <option value="Malayalam" style="color: black;">Malayalam</option>
+                </select>
+            </div>
+            <button class="chat-close-btn" id="chat-close-btn">&times;</button>
+        </div>
+        <div class="chat-body" id="chat-body">
+            <div class="message received">Hello! I'm your AI Assistant. How can I help you with your cybercrime concerns
+                today?</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chat-input" placeholder="Type your message...">
+            <button id="chat-send-btn">Send</button>
+        </div>
+    </div>
+
+    <button class="chatbot-toggle-btn" id="chatbot-toggle-btn">
+        🤖
+    </button>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Counter Animation
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach(stat => {
+                const target = parseInt(stat.innerText);
+                if (isNaN(target)) return;
+                let count = 0;
+                const duration = 1500; // 1.5s
+                const increment = target / (duration / 16); // 60fps
+
+                const timer = setInterval(() => {
+                    count += increment;
+                    if (count >= target) {
+                        stat.innerText = target;
+                        clearInterval(timer);
+                    } else {
+                        stat.innerText = Math.ceil(count);
+                    }
+                }, 16);
+            });
+
+            const modalOverlay = document.getElementById('modal-overlay');
+            const chatModal = document.getElementById('chat-modal');
+            const toggleBtn = document.getElementById('chatbot-toggle-btn');
+            const closeBtn = document.getElementById('chat-close-btn');
+            const sendBtn = document.getElementById('chat-send-btn');
+            const chatInput = document.getElementById('chat-input');
+            const chatBody = document.getElementById('chat-body');
+
+            // Add Typing Indicator to Chat Body
+            const typingIndicator = document.createElement('div');
+            typingIndicator.className = 'typing-indicator';
+            typingIndicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            chatBody.appendChild(typingIndicator);
+
+            function showTyping() {
+                typingIndicator.style.display = 'flex';
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+
+            function hideTyping() {
+                typingIndicator.style.display = 'none';
+            }
+
+            function openChat() {
+                modalOverlay.classList.add('active');
+                chatModal.classList.add('active');
+            }
+
+            function closeChat() {
+                modalOverlay.classList.remove('active');
+                chatModal.classList.remove('active');
+            }
+
+            toggleBtn.addEventListener('click', openChat);
+            closeBtn.addEventListener('click', closeChat);
+            modalOverlay.addEventListener('click', closeChat);
+
+            function addMessage(text, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message', type);
+
+                // Animate message entry
+                messageDiv.style.opacity = '0';
+                messageDiv.style.transform = 'translateY(10px)';
+                messageDiv.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+                if (type === 'received') {
+                    messageDiv.innerHTML = marked.parse(text);
+                } else {
+                    messageDiv.textContent = text;
+                }
+
+                chatBody.insertBefore(messageDiv, typingIndicator); // Insert before typing indicator
+
+                // Trigger animation
+                setTimeout(() => {
+                    messageDiv.style.opacity = '1';
+                    messageDiv.style.transform = 'translateY(0)';
+                }, 10);
+
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+
+            function sendMessage() {
+                const userMessage = chatInput.value.trim();
+                if (userMessage === '') return;
+                addMessage(userMessage, 'sent');
+                chatInput.value = '';
+
+                showTyping(); // Show typing indicator
+
+                const csrfToken = '{{ csrf_token }}';
+                const language = document.getElementById('language-selector').value;
+
+                fetch("{% url 'chatbot_response' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({ message: userMessage, language: language })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        hideTyping(); // Hide typing indicator
+                        addMessage(data.response, 'received');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        hideTyping();
+                        addMessage("Sorry, something went wrong. Please try again.", 'received');
+                    });
+            }
+
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

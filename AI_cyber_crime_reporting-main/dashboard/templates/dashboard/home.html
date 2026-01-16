@@ -1,0 +1,97 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard/css/landing_page.css' %}?v=3">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Welcome to CyberShield</h1>
+            <p>Advanced Cybercrime Reporting & Investigation Platform</p>
+
+            <div class="btn-container">
+                {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                <a href="{% url 'investigator_dashboard' %}" class="btn btn-primary">
+                    <i class="fas fa-tachometer-alt"></i> Go to Investigator Dashboard
+                </a>
+                {% else %}
+                <a href="{% url 'user_dashboard' %}" class="btn btn-primary">
+                    <i class="fas fa-user-shield"></i> Go to User Dashboard
+                </a>
+                {% endif %}
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="{% url 'signup' %}" class="btn btn-secondary">
+                    <i class="fas fa-user-plus"></i> Sign Up
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="hero-animation">
+            <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_m9zragkd.json" background="transparent"
+                speed="1" style="width: 100%; height: 100%;" loop autoplay></lottie-player>
+        </div>
+    </section>
+
+    <!-- Features Section (Now outside Hero) -->
+    <section class="features-section">
+        {% if user.is_superuser %}
+        <!-- Investigator Features -->
+        <h2 class="section-title">Investigator Tools</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-folder-open feature-icon icon-float"></i>
+                <h3>Case Management</h3>
+                <p>Centralized dashboard to manage, track, and update all reported cybercrime cases efficiently.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-chart-line feature-icon icon-wave"></i>
+                <h3>Advanced Analytics</h3>
+                <p>AI-powered insights and heatmaps to identify crime hotspots and trends.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-lock feature-icon icon-pulse"></i>
+                <h3>Secure Comms</h3>
+                <p>End-to-end encrypted communication channels for sensitive case discussions.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-file-alt feature-icon icon-float"></i>
+                <h3>Complaint Reports</h3>
+                <p>Generate detailed reports and export case data for official documentation.</p>
+            </div>
+        </div>
+        {% else %}
+        <!-- Citizen/Guest Features -->
+        <h2 class="section-title">Citizen Services</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-shield-alt feature-icon icon-pulse"></i>
+                <h3>Secure Reporting</h3>
+                <p>File cybercrime reports securely with our encrypted and anonymous reporting system.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-robot feature-icon icon-float"></i>
+                <h3>AI Assistance</h3>
+                <p>Get real-time help from our AI to draft accurate incident descriptions and categorize cases.</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-satellite-dish feature-icon icon-wave"></i>
+                <h3>Real-time Tracking</h3>
+                <p>Track the status of your complaint in real-time and receive instant updates.</p>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+<!-- Lottie Player Script -->
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Case #{{ case.id }} - Secure Chat</title>
+    <link rel="stylesheet" href="{% static 'dashboard/css/chat.css' %}?v=8">
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <span>Case #{{ case.id }} - {{ case.case_type }} (Status: {{ case.status }})</span>
+            <a href="{% url 'user_dashboard' %}" class="btn-back">Back to Dashboard</a>
+        </div>
+
+        <div class="case-content-grid">
+            <!-- Left Column: Evidence -->
+            <div class="evidence-section">
+                <div class="case-description"
+                    style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <h3>Case Description</h3>
+                    <div
+                        style="background: rgba(15, 23, 42, 0.3); padding: 1rem; border-radius: 8px; font-size: 0.9rem; line-height: 1.5; white-space: pre-wrap; max-height: 200px; overflow-y: auto; border: 1px solid rgba(148, 163, 184, 0.1);">
+                        {{ case.description }}</div>
+                </div>
+
+                <h3>Evidence</h3>
+
+                {% if evidence_list %}
+                <ul class="evidence-list">
+                    {% for item in evidence_list %}
+                    <li class="evidence-item">
+                        <div>
+                            <a href="{{ item.file.url }}" target="_blank" class="evidence-link">{{ item.file.name }}</a>
+                            {% if item.description %}
+                            <p class="evidence-desc">{{ item.description }}</p>
+                            {% endif %}
+                        </div>
+                        <span class="evidence-date">{{ item.uploaded_at|date:"M d, Y" }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="no-data">No evidence uploaded yet.</p>
+                {% endif %}
+
+                {% if request.user == case.user %}
+                <h4>Upload New Evidence</h4>
+                <form method="post" enctype="multipart/form-data" class="upload-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="upload_evidence" value="true">
+
+                    <div class="form-group">
+                        <label>File:</label>
+                        {{ evidence_form.file }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Description (Optional):</label>
+                        {{ evidence_form.description }}
+                    </div>
+
+                    <button type="submit" class="btn-upload">Upload Evidence</button>
+                </form>
+                {% endif %}
+            </div>
+
+            <!-- Right Column: Chat -->
+            <div class="chat-section">
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="message {% if message.sender == request.user %}sent{% else %}received{% endif %}"
+                        data-id="{{ message.id }}">
+                        <span class="meta">{{ message.sender.username }}</span>
+                        <p>{{ message.content }}</p>
+                        <div style="clear: both;"></div>
+                        <small>{{ message.timestamp|date:"d M Y, H:i" }}</small>
+                    </div>
+                    {% empty %}
+                    <p class="no-data">No messages yet. Start the conversation below.</p>
+                    {% endfor %}
+                </div>
+
+                <form method="post" class="message-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="send_message" value="true">
+                    {{ form.content }}
+                    <button type="submit" class="btn-send">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const messagesContainer = document.querySelector('.messages');
+            let lastId = 0;
+
+            // Initialize lastId from existing messages
+            const existingMessages = document.querySelectorAll('.message');
+            if (existingMessages.length > 0) {
+                lastId = existingMessages[existingMessages.length - 1].getAttribute('data-id');
+            }
+
+            // Scroll to bottom on load
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            function fetchMessages() {
+                fetch(`{% url 'get_case_messages' case.id %}?last_id=${lastId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.messages && data.messages.length > 0) {
+                            data.messages.forEach(msg => {
+                                const msgDiv = document.createElement('div');
+                                msgDiv.className = `message ${msg.is_current_user ? 'sent' : 'received'}`;
+                                msgDiv.setAttribute('data-id', msg.id);
+
+                                msgDiv.innerHTML = `
+                                    <span class="meta">${msg.sender}</span>
+                                    <p>${msg.content}</p>
+                                    <div style="clear: both;"></div>
+                                    <small>${msg.timestamp}</small>
+                                `;
+
+                                messagesContainer.insertBefore(msgDiv, messagesContainer.querySelector('.no-data')); // Insert before no-data if exists, or append
+                                if (messagesContainer.querySelector('.no-data')) {
+                                    messagesContainer.querySelector('.no-data').remove();
+                                } else {
+                                    messagesContainer.appendChild(msgDiv);
+                                }
+
+                                lastId = msg.id;
+                            });
+
+                            // Scroll to bottom on new message
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        }
+                    })
+                    .catch(error => console.error('Error fetching messages:', error));
+            }
+
+            // Poll every 3 seconds
+            setInterval(fetchMessages, 3000);
+        });
+    </script>
+</body>
+
+</html>

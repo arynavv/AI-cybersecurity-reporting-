@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>All Complaints - CyberShield</title>
+    <link rel="stylesheet" href="{% static 'dashboard/css/investigator_dashboard.css' %}?v=6">
+    <style>
+        .btn-filter {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: #374151;
+            color: #E5E7EB;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: 1px solid #4B5563;
+        }
+
+        .btn-filter:hover {
+            background-color: #4B5563;
+            color: white;
+        }
+
+        .btn-filter.active {
+            background-color: #3B82F6;
+            color: white;
+            border-color: #3B82F6;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>All Complaints</h1>
+            <div class="header-actions">
+                <a href="{% url 'export_complaints_csv' %}" class="btn-nav"
+                    style="background-color: rgba(16, 185, 129, 0.2); color: #10B981; border-color: rgba(16, 185, 129, 0.3);">Export
+                    to Excel</a>
+                <a href="{% url 'investigator_dashboard' %}" class="btn-nav">Back to Dashboard</a>
+                <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-nav btn-logout">Logout</button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <div class="dashboard-main" style="grid-column: span 2;">
+
+            <!-- Filter Section -->
+            <div class="card" style="margin-bottom: 20px; padding: 15px;">
+                <div class="filter-buttons" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                    <span style="font-weight: bold; margin-right: 10px;">Filter by Status:</span>
+
+                    <a href="{% url 'all_complaints' %}"
+                        class="btn-filter {% if not current_status %}active{% endif %}">
+                        All
+                    </a>
+
+                    {% for status_code, status_label in status_choices %}
+                    <a href="?status={{ status_code }}"
+                        class="btn-filter {% if current_status == status_code %}active{% endif %}">
+                        {{ status_label }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>Incident Type</th>
+                            <th>Department</th>
+                            <th>Status</th>
+                            <th>Date Reported</th>
+                            <th>Filed By</th>
+                            <th>Manage Case</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for case in cases %}
+                        <tr>
+                            <td><strong>C-{{ case.id }}</strong></td>
+                            <td>{{ case.case_type }}</td>
+                            <td>{{ case.department }}</td>
+                            <td><span class="status status-open">{{ case.status }}</span></td>
+                            <td>{{ case.date_filed|date:"Y-m-d" }}</td>
+                            <td>{{ case.user.username }}</td>
+                            <td>
+                                <a href="{% url 'case_detail' case.id %}" class="btn-action btn-action-primary">View
+                                    Messages</a>
+                                <a href="{% url 'update_case_status' case.id %}"
+                                    class="btn-action btn-action-secondary">Update Status</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">No cases found in the database.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

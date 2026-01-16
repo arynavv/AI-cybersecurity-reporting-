@@ -1,0 +1,296 @@
+{% extends "dashboard/base.html" %}
+
+{% block extra_css %}
+<style>
+    /* Cyber Background */
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 50% 50%, #1a2332 0%, #0f172a 100%);
+        z-index: -1;
+        animation: pulseBackground 10s infinite alternate;
+    }
+
+    @keyframes pulseBackground {
+        0% {
+            background-size: 100% 100%;
+        }
+
+        100% {
+            background-size: 120% 120%;
+        }
+    }
+
+    /* Main Container Animation */
+    .container {
+        animation: fadeInZoom 1s ease-out forwards;
+        opacity: 0;
+        transform: scale(0.95);
+        background: rgba(31, 41, 55, 0.8);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+        max-width: 900px;
+        /* Wider container for side-by-side */
+        padding: 2rem;
+    }
+
+    @keyframes fadeInZoom {
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* Login Grid Layout */
+    .login-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    /* Heading Animation */
+    h2 {
+        animation: slideDown 0.8s ease-out 0.3s forwards;
+        opacity: 0;
+        transform: translateY(-20px);
+        text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        margin-bottom: 1.5rem;
+        text-align: center;
+    }
+
+    @keyframes slideDown {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Button Animations */
+    button[type="submit"] {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #2563EB;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        margin-top: 1rem;
+    }
+
+    button[type="submit"]:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+        background-color: #1D4ED8;
+    }
+
+    /* Hide default browser password toggles */
+    input::-ms-reveal,
+    input::-ms-clear {
+        display: none;
+    }
+
+    input::-webkit-credentials-auto-fill-button {
+        visibility: hidden;
+        pointer-events: none;
+        position: absolute;
+        right: 0;
+    }
+
+    /* Form Group Styling */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #9CA3AF;
+        font-size: 0.9rem;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #374151;
+        border: 1px solid #4B5563;
+        border-radius: 4px;
+        color: white;
+        font-size: 0.95rem;
+    }
+
+    input:focus {
+        outline: none;
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Password Toggle Styled Container */
+    .password-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background-color: #374151;
+        border: 1px solid #4B5563;
+        border-radius: 4px;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .password-wrapper:focus-within {
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .password-wrapper input {
+        border: none;
+        background: transparent;
+        padding-right: 45px;
+        /* Space for the icon */
+        box-shadow: none;
+        /* Remove default focus shadow from input */
+        width: 100%;
+        margin: 0;
+        /* Override default input margin */
+    }
+
+    .password-wrapper input:focus {
+        box-shadow: none;
+        border: none;
+        outline: none;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #9CA3AF;
+        background: none;
+        border: none;
+        padding: 0;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        font-size: 1.1rem;
+    }
+
+    .toggle-password:hover {
+        color: #60A5FA;
+    }
+
+    /* Lottie Animation Container */
+    .lottie-container {
+        width: 100%;
+        max-width: 350px;
+        height: auto;
+        margin: 0 auto;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: #9CA3AF;
+    }
+
+    .login-link a {
+        color: #60A5FA;
+        text-decoration: none;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .login-content {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .lottie-container {
+            max-width: 200px;
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="login-content">
+        <!-- Left Column: Animation -->
+        <div class="lottie-wrapper">
+            <div class="lottie-container">
+                <!-- Developer Coding Animation -->
+                <lottie-player src="https://assets9.lottiefiles.com/packages/lf20_w51pcehl.json"
+                    background="transparent" speed="1" style="width: 100%; height: 100%;" loop autoplay></lottie-player>
+            </div>
+        </div>
+
+        <!-- Right Column: Login Form -->
+        <div class="form-wrapper">
+            <h2>Login</h2>
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Username</label>
+                    {{ form.username }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">Password</label>
+                    <div class="password-wrapper">
+                        {{ form.password }}
+                        <span class="toggle-password"
+                            onclick="togglePassword('{{ form.password.id_for_label }}', this)">
+                            <i class="fa fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit">Login</button>
+            </form>
+            <div class="login-link">
+                Don't have an account? <a href="{% url 'signup' %}">Sign up</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lottie Player Script -->
+<script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+<script>
+    function togglePassword(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        const icon = btn.querySelector('i');
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>
+{% endblock %}

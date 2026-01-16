@@ -1,0 +1,300 @@
+/* General page styling for dark theme */
+body {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    color: #e2e8f0;
+    min-height: 100vh;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    max-width: 1200px;
+    margin: 2rem auto;
+    height: 90vh;
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+/* Chat Header Styling */
+.chat-header {
+    background: rgba(15, 23, 42, 0.8);
+    padding: 1.5rem;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #3b82f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.btn-back {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.btn-back:hover {
+    color: #e2e8f0;
+}
+
+/* Grid Layout for Content */
+.case-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* 50/50 split */
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Left Column: Evidence Section */
+.evidence-section {
+    padding: 1.5rem;
+    background: rgba(15, 23, 42, 0.3);
+    overflow-y: auto;
+    height: 100%;
+    border-right: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.evidence-section h3,
+.evidence-section h4 {
+    color: #f1f5f9;
+    margin-bottom: 1rem;
+}
+
+.evidence-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+}
+
+.evidence-item {
+    background: rgba(15, 23, 42, 0.5);
+    margin-bottom: 0.75rem;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.evidence-link {
+    color: #3b82f6;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.evidence-link:hover {
+    text-decoration: underline;
+}
+
+.evidence-desc {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.evidence-date {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.upload-form {
+    background: rgba(15, 23, 42, 0.5);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #cbd5e1;
+    font-size: 0.9rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 6px;
+    color: #e2e8f0;
+}
+
+.btn-upload {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-upload:hover {
+    background: #059669;
+}
+
+.no-data {
+    color: #94a3b8;
+    font-style: italic;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Right Column: Chat Section */
+.chat-section {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Message Display Area */
+.messages {
+    flex-grow: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+/* Individual Message Bubble Styling */
+.message {
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    max-width: 70%;
+    clear: both;
+    position: relative;
+    line-height: 1.5;
+}
+
+.message p {
+    margin: 0;
+    word-wrap: break-word;
+}
+
+.message .meta {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.message.received .meta {
+    color: #94a3b8;
+}
+
+.message.sent .meta {
+    color: #bfdbfe;
+    text-align: right;
+}
+
+/* Styling for RECEIVED messages */
+.message.received {
+    background-color: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    float: left;
+    border-bottom-left-radius: 2px;
+}
+
+/* Styling for SENT messages */
+.message.sent {
+    background-color: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    float: right;
+    border-bottom-right-radius: 2px;
+}
+
+/* Timestamp Styling */
+.message small {
+    display: block;
+    font-size: 0.7em;
+    opacity: 0.7;
+    margin-top: 5px;
+}
+
+.message.sent small {
+    text-align: right;
+}
+
+/* Message Input Form Styling */
+.message-form {
+    background: rgba(15, 23, 42, 0.5);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.message-form textarea {
+    flex-grow: 1;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    background-color: rgba(15, 23, 42, 0.5);
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    resize: none;
+    font-family: inherit;
+}
+
+.message-form textarea:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.btn-send {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    background: #3b82f6;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-send:hover {
+    background: #2563eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .case-content-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+    }
+
+    .chat-container {
+        height: auto;
+        min-height: 90vh;
+    }
+
+    .chat-section {
+        height: 500px;
+        /* Fixed height for chat on mobile */
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+
+    .evidence-section {
+        height: auto;
+        border-right: none;
+    }
+}
