@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Cybersecurity Reporting Portal</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0b0f19; color: white; margin: 0; }
+        header { background: #111726; padding: 20px; text-align: center; font-size: 28px; }
+        nav { text-align: center; margin-top: 20px; }
+        nav a { margin: 0 15px; color: #76a9ff; text-decoration: none; font-size: 18px; }
+        .container { width: 90%; margin: auto; padding: 20px; }
+        .card { background: #141b2d; border-radius: 10px; padding: 20px; margin-top: 20px; }
+        input, select { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: none; }
+        button { padding: 10px 20px; background: #4a8cff; border: none; border-radius: 5px; color: white; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #2e6ee6; }
+        .login-box { max-width: 400px; margin: auto; margin-top: 50px; background: #141b2d; padding: 30px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<header>AI Cybersecurity Reporting Portal</header>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="login.html">Login</a>
+    <a href="report.html">Start Complaint</a>
+    <a href="status.html">Track Status</a>
+</nav>
+
+<div class="container">
+    <div class="card">
+        <h2>Welcome to the AI Cybercrime Reporting Portal</h2>
+        <p>Report cybercrimes easily using AI assistance (Gemini), voice input, and secure evidence upload.</p>
+    </div>
+</div>
+
+</body>
+</html>
+
